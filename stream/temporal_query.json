@@ -1,0 +1,23 @@
+{
+    "size": 10000,
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "match": {"keyword": ""}
+                }, 
+                {
+                    "range": {
+                        "timestamp": {
+                            "gte": "", 
+                            "lte": "" 
+                        } 
+                    }
+                }
+            ] 
+        }
+    },
+    "sort": [
+        {"timestamp": "asc"}     
+    ]
+}

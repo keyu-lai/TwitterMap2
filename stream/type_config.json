@@ -1,0 +1,31 @@
+{
+	"mappings": {
+		"tweet_sentiment": {
+			"properties": {
+				"keyword": {
+					"type": "string",
+					"index": "not_analyzed"	
+				},	
+				"sentiment": {
+					"type": "string",
+					"index": "not_analyzed"	
+				},	
+				"author": {
+					"type": "string",
+					"index": "not_analyzed"	
+				},	
+				"text": {
+					"type": "string",
+					"index": "not_analyzed"	
+				},	
+				"coordinates": {
+					"type": "geo_point"
+				},	
+				"timestamp": {
+					"type": "date",
+					"format": "EE MMM d HH:mm:ss Z yyyy"	
+				}
+			}
+		}
+	}
+}

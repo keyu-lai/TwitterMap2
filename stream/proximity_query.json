@@ -1,0 +1,29 @@
+{
+    "size": 10000,
+    "query": {
+        "bool": {
+            "filter": [
+                {
+                    "match": {"keyword": ""}
+                }, 
+                {
+                    "range": {
+                        "timestamp": {
+                            "gte": "", 
+                            "lte": "" 
+                        } 
+                    }
+                },
+                {
+                    "geo_distance": {
+                        "distance": "",
+                        "coordinates": []
+                    } 
+                }
+            ] 
+        } 
+    },
+    "sort": [
+        {"timestamp": "asc"}     
+    ]
+}
