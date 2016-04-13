@@ -7,6 +7,16 @@ var bludMarker = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
 var redMarker = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
 var yellowMarker = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
 
+var newTweets = 0;
+
+$(document).ready(
+        function() {
+            sse = new EventSource('/my_event_source');
+            sse.onmessage = function(message) {
+                newTweets += 1;
+                document.getElementById("newTweets").innerHTML = "New Tweets: " + newTweets;
+            }
+        })
 
 function attachMessage(marker, meg) {
 	var infowindow = new google.maps.InfoWindow({
@@ -89,6 +99,8 @@ $('#datetimepicker2').datetimepicker();
  * When clicking the sumbit button, send a POST request
  */
 $("button").on("click", function() {
+	newTweets = 0;
+	document.getElementById("newTweets").innerHTML = "New Tweets: " + newTweets;
 	sendHttp();
 });
 

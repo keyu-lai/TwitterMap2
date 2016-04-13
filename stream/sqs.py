@@ -7,8 +7,8 @@ class queue:
 
 		conn = boto.sqs.connect_to_region(
 			'us-east-1',
-			aws_access_key_id='AKIAIMZZIRCQ6KZS2HEQ',
-			aws_secret_access_key='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')
+			aws_access_key_id='AKIAIM24ELNKQQ3RRUFQ',
+			aws_secret_access_key='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')
 
 		self.q = conn.create_queue('TweetMap')
 

@@ -1,14 +1,35 @@
-from flask import Flask, request, render_template
-import json
-import requests
+from flask import Flask, request, render_template, Response
+import json, requests
 from stream.elastic_search import temporal_search, proximity_search
 from datetime import datetime
+import gevent
+from gevent.wsgi import WSGIServer
 
 application = Flask(__name__)
 
 host = 'http://40.114.93.37:9200'
 ind = 'twitter_again'
 mapping_type = 'tweet_sentiment'
+
+COMING_TWEET = 0
+
+def event_stream():
+	global COMING_TWEET
+	while True:
+		if COMING_TWEET > 0:
+			while COMING_TWEET > 0:
+				COMING_TWEET -= 1
+				yield 'data: new megs!\n\n'
+		else:
+			gevent.sleep(1)
+
+@application.route('/my_event_source')
+def sse_request():
+	global COMING_TWEET
+	COMING_TWEET = 0
+	return Response(
+			event_stream(),
+			mimetype='text/event-stream')
 
 def _init_index():
 	url = '/'.join([host, ind])
@@ -23,7 +44,6 @@ def _insert(string):
 	res = requests.post(url, data=string)
 	while res.status_code != 201 or not res.json()['created']:
 		res = requests.post(url, data=string)
-	print('successful')
 
 def convert(original_time):
 	timestamp = datetime.strptime(original_time, '%m-%d-%Y %I:%M %p')
@@ -61,12 +81,9 @@ def get_global():
 def get_sns():
 	'''Receieve notifications from sns
 	'''
-
 	if 'x-amz-sns-message-type' not in request.headers:
 		return 'not a valid sns notification'
-
 	content = json.loads(request.get_data())
-	
 	# Comfirm the subscription
 	if request.headers['x-amz-sns-message-type'] == 'SubscriptionConfirmation':
 		print content['SubscribeURL']
@@ -74,7 +91,8 @@ def get_sns():
 		print r.text
 	# Get the content of message
 	elif request.headers['x-amz-sns-message-type'] == 'Notification':
-		#print content['Subject']
+		global COMING_TWEET
+		COMING_TWEET += 1
 		_insert(str(content['Message']))
 	# Comfirm the unsubscription
 	elif request.headers['x-amz-sns-message-type'] == 'UnsubscribeConfirmation':
@@ -82,4 +100,5 @@ def get_sns():
 
 if __name__=='__main__':
 	_init_index()
-	application.run(host='0.0.0.0', debug=True)
+	http_server = WSGIServer(('0.0.0.0', 5000), application)
+	http_server.serve_forever()

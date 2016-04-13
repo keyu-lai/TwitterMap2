@@ -1,6 +1,6 @@
 from streaming_server import q
 import boto.sns
-
+import thread
 import requests, json, sys
 
 class notification():
@@ -9,8 +9,8 @@ class notification():
 
 		self.conn = boto.sns.connect_to_region(
 			'us-east-1',
-			aws_access_key_id='AKIAIMZZIRCQ6KZS2HEQ',
-			aws_secret_access_key='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')
+			aws_access_key_id='AKIAIM24ELNKQQ3RRUFQ',
+			aws_secret_access_key='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')
 		self.arn = 'arn:aws:sns:us-east-1:386615683938:TwitterMap'
 
 	def publish(self, meg):
@@ -29,25 +29,21 @@ def get_sentiment(text):
 		print json.loads(re.text)
 	return res
 
-def init_sns():
+def worker_thread(tweet, n):
 
-	conn = boto.sns.connect_to_region(
-		'us-east-1',
-		aws_access_key_id='AKIAIMZZIRCQ6KZS2HEQ',
-		aws_secret_access_key='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')
-
+	tweet = json.loads(tweet)
+	text = tweet['text']
+	sen = get_sentiment(text)
+	if sen:
+		tweet['sentiment'] = sen
+		n.publish(json.dumps(tweet))
+		print json.dumps(tweet)
 
 if __name__ == '__main__':
 
 	n = notification()
-
 	while True:
 		tweet = q.get_message()
 		if tweet:
-			tweet = json.loads(tweet)
-			text = tweet['text']
-			sen = get_sentiment(text)
-			if sen:
-				tweet['sentiment'] = sen
-				n.publish(json.dumps(tweet))
+			thread.start_new_thread(worker_thread, (tweet, n, ))
 
